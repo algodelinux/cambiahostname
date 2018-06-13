@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# cambiahostname: Script para cambiar el nombre de una máquina y realizar un pkgsync
+#
+# Funcionamiento:
+# * Es posible introducir el nombre de la máquina como parámetro.
+# * Si no se introduce el nombre como parámetro, tratará de obtenerlo consultando al DNS definido en DNSSERVER.
+# * Si no se puede obtener el nombre consultando al servidor DNS, se solicita su introdución mediante teclado.
+#
+# Esteban M. Navas <algodelinux@gmail.com>
+# Fecha creación:      08/07/2016
+# Última modificación: 12/06/2018
+
+DNSSERVER="servidor"
+
+# Si no hay parámetros, el script tratará de obtener el nombre de la máquina consultando al servidor DNSSERVER
+if [ -z "$1" ]; then
+
+   INTERFACESUP=$(ip link show up|grep ^[0-9]| grep -v lo|cut -f2 -d":"|sed 's/^[ \t]*//')
+
+   for INTERFACE in $INTERFACESUP; do
+
+      IP=$(ip addr show $INTERFACE | grep -v inet6 | grep 'inet' | sed 's/^[ \t]*//' | cut -f2 -d" " | cut -f1 -d"/")
+
+      if [ "$IP" ]; then
+         DOMAINNAME=$(nslookup $IP $DNSSERVER | grep name | sed -e 's/.*[ \t]\([^ \t]*\)\.$/\1/')
+         if [ $DOMAINNAME ]; then
+            HOSTNAME=${DOMAINNAME%.*}
+         fi
+      fi
+   done
+
+   if [ -z $HOSTNAME ]; then # Si la máquina no está registrada en el servidor DNS, se solicita introducir el nombre por pantalla
+
+      DIALOG="dialog"
+      tempfile=`tempfile 2>/dev/null` || tempfile=/tmp/test$$
+      trap "rm -f $tempfile" 0 1 2 5 15
+
+      $DIALOG --title "Nombre de host" --clear \
+              --inputbox "Introduzca el nombre de host que desea asignar a este equipo. Este nombre debe ser una cadena de caracteres alfanuméricos en minúsculas, sin espacios:" 15 51 2> $tempfile
+
+      retval=$?
+
+      case $retval in
+        0)
+          NOMBRE=`cat $tempfile`
+        ;;
+        1) ;;
+      esac
+
+   else
+      NOMBRE=$HOSTNAME
+   fi
+
+else # Se ha introducido el nombre del host como parámetro
+   NOMBRE=$1
+fi
+
+if [ "$NOMBRE" ] ; then
+
+   echo "127.0.0.1       localhost
+127.0.1.1       $NOMBRE
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters" > /etc/hosts
+
+   echo "$NOMBRE" >  /etc/hostname
+   hostname -F /etc/hostname
+
+#   /usr/sbin/sinc_puppet -f now
+   /usr/local/sbin/pkgsync -pcr
+
+fi
