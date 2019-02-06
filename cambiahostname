@@ -9,7 +9,7 @@
 #
 # Esteban M. Navas <algodelinux@gmail.com>
 # Fecha creación:      08/07/2016
-# Última modificación: 12/06/2018
+# Última modificación: 06/02/2019
 
 DNSSERVER="servidor"
 
@@ -49,7 +49,11 @@ if [ -z "$1" ]; then
       esac
 
    else
-      NOMBRE=$HOSTNAME
+      if [ "$HOSTNAME" == "modelo" ]; then
+         NOMBRE=`ip -o link  | awk '{print $2,$(NF-2)}' | grep -v -e "lo" -e wl | cut -f2 -d" " | sed 's/://g'`
+      else
+         NOMBRE=$HOSTNAME
+      fi
    fi
 
 else # Se ha introducido el nombre del host como parámetro
@@ -71,7 +75,7 @@ ff02::2 ip6-allrouters" > /etc/hosts
    echo "$NOMBRE" >  /etc/hostname
    hostname -F /etc/hostname
 
-#   /usr/sbin/sinc_puppet -f now
-   /usr/local/sbin/pkgsync -pcr
+   [ -x /usr/sbin/sinc_puppet ] && /usr/sbin/sinc_puppet -f now
+   [ -x /usr/local/sbin/pkgsync ] && /usr/local/sbin/pkgsync -pc
 
 fi
