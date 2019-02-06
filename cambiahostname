@@ -5,6 +5,8 @@
 # Funcionamiento:
 # * Es posible introducir el nombre de la máquina como parámetro.
 # * Si no se introduce el nombre como parámetro, tratará de obtenerlo consultando al DNS definido en DNSSERVER.
+# * Si no se ha introducido un nombre como parámetro ni se ha obtenido consultando al DNSSERVER y el HOSTNAME es
+#   'modelo', se establece como HOSTNAME la dirección MAC de la interfaz de red ethernet.
 # * Si no se puede obtener el nombre consultando al servidor DNS, se solicita su introdución mediante teclado.
 #
 # Esteban M. Navas <algodelinux@gmail.com>
