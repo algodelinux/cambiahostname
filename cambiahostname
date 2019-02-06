@@ -7,7 +7,8 @@
 # * Si no se introduce el nombre como parámetro, tratará de obtenerlo consultando al DNS definido en DNSSERVER.
 # * Si no se ha introducido un nombre como parámetro ni se ha obtenido consultando al DNSSERVER y el HOSTNAME es
 #   'modelo', se establece como HOSTNAME la dirección MAC de la interfaz de red ethernet.
-# * Si no se puede obtener el nombre consultando al servidor DNS, se solicita su introdución mediante teclado.
+# * Si no se ha introducido un nombre como parámetro ni se puede obtener el nombre consultando al servidor DNS
+#   y el hostname no es 'modelo', se solicita su introdución mediante teclado.
 #
 # Esteban M. Navas <algodelinux@gmail.com>
 # Fecha creación:      08/07/2016
