@@ -18,7 +18,7 @@ Uso
 
 * Es posible introducir el nombre de la máquina como parámetro.   
 * Si no se introduce el nombre como parámetro, tratará de obtenerlo consultando al DNS definido en DNSSERVER.   
-* Si el hostname es modelo, se utilizará como hostname la dirección MAC de la interfaz de red ethernet.   
+* Si el hostname de la máquina es 'modelo', y no se ha encontrado un hostname para el equipo en el servidor DNS, se utilizará como hostname la dirección MAC de la interfaz de red ethernet.   
 * Si no se puede obtener el nombre consultando al servidor DNS, se solicita su introdución mediante teclado.   
   
 
