@@ -5,16 +5,48 @@
 # Funcionamiento:
 # * Es posible introducir el nombre de la máquina como parámetro.
 # * Si no se introduce el nombre como parámetro, tratará de obtenerlo consultando al DNS definido en DNSSERVER.
-# * Si no se ha introducido un nombre como parámetro ni se ha obtenido consultando al DNSSERVER y el HOSTNAME es
-#   'modelo', se establece como HOSTNAME la dirección MAC de la interfaz de red ethernet.
-# * Si no se ha introducido un nombre como parámetro ni se puede obtener el nombre consultando al servidor DNS
-#   y el hostname no es 'modelo', se solicita su introdución mediante teclado.
+# * Si no se puede obtener el nombre consultando al servidor DNS, se solicita su introdución mediante teclado.
 #
 # Esteban M. Navas <algodelinux@gmail.com>
 # Fecha creación:      08/07/2016
-# Última modificación: 06/02/2019
+# Última modificación: 07/02/2019
 
 DNSSERVER="servidor"
+SINCPUPPET=0
+PKGSYNC=0
+
+function print_help {
+        echo "$SCRIPT $VERSION"
+        echo "Cambiar el nombre del host"
+        echo ""
+        echo "Uso: $0 [OPTIONS]"
+        echo "Opciones reconocidas:"
+        echo "  -h               mostrar esta ayuda y salir."
+        echo "  -n HOSTNAME      introducir el nombre de host. (sólo se cambiará el hostname si no existe una entrada DNS para este HOST)"
+        echo "  -d DNSSERVER     introducir el servidor DNS."
+        echo "  -s               ejecutar sinc_puppet."
+        echo "  -p               ejecutar pkgsync."
+        echo ""
+}
+
+
+##Leer y procesar argumentos
+while getopts "n: d: sph" opt
+do
+    case $opt in
+        h ) print_help
+            exit ;;
+        n ) HOSTNAME=$OPTARG ;;
+        d ) DNSSERVER=$OPTARG ;;
+        p ) PKGSYNC=1 ;;
+        s ) SINCPUPPET=1 ;;
+        \? ) echo "Opcion invalida -$OPTARG"
+          exit 1 ;;
+        : ) echo "Opcion -$OPTARG requiere un argumento"
+          exit 1 ;;
+    esac
+done
+shift $((OPTIND-1))
 
 # Si no hay parámetros, el script tratará de obtener el nombre de la máquina consultando al servidor DNSSERVER
 if [ -z "$1" ]; then
@@ -78,7 +110,9 @@ ff02::2 ip6-allrouters" > /etc/hosts
    echo "$NOMBRE" >  /etc/hostname
    hostname -F /etc/hostname
 
-   [ -x /usr/sbin/sinc_puppet ] && /usr/sbin/sinc_puppet -f now
-   [ -x /usr/local/sbin/pkgsync ] && /usr/local/sbin/pkgsync -pc
+   echo "Hostname: $NOMBRE"
+
+   [ $SINCPUPPET -eq 1 ] && [ -x /usr/sbin/sinc_puppet ] && /usr/sbin/sinc_puppet -f now
+   [ $PKGSYNC -eq 1 ] && [ -x /usr/local/sbin/pkgsync ] && /usr/local/sbin/pkgsync -pcnf
 
 fi
