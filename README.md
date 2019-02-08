@@ -1,7 +1,7 @@
 cambiahostname
 ==============
 
-Script que permite cambiar el nombre de host de un equipo y realizar un pkgsync tras cambiarlo   
+Script que permite cambiar el nombre de host de un equipo y realizar opcionalmente un sinc_puppet y un pkgsync tras cambiarlo   
 
 
 Instalación
